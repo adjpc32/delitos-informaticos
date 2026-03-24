@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delitos Informáticos | 10° B</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500&family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-green: #00ff41;
+            --dark-bg: #010409;
+            --card-bg: rgba(13, 17, 23, 0.95);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; }
+
+        /* NAVEGACIÓN MEJORADA */
+        nav {
+            position: fixed; top: 0; width: 100%; background: rgba(1, 4, 9, 0.95);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding: 0 20px;
+            display: none; justify-content: center; align-items: center; height: 70px; z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        .nav-container { display: flex; gap: 30px; }
+        nav a { 
+            color: #94a3b8; text-decoration: none; font-size: 0.85rem; 
+            text-transform: uppercase; font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px; transition: 0.3s; position: relative;
+            padding: 10px 0;
+        }
+        nav a::after {
+            content: ''; position: absolute; bottom: 0; left: 0; width: 0; 
+            height: 2px; background: var(--neon-blue); transition: 0.3s;
+        }
+        nav a:hover { color: var(--neon-blue); }
+        nav a:hover::after { width: 100%; }
+        nav a.active-link { color: var(--neon-green); }
+
+        /* EFECTO FOCUS */
+        .card:target {
+            border: 2px solid var(--neon-green) !important;
+            box-shadow: 0 0 50px rgba(0, 255, 65, 0.3);
+            transform: scale(1.01);
+        }
+
+        /* CONTENIDO */
+        .content-container { max-width: 900px; margin: 120px auto 40px; padding: 20px; text-align: center; }
+        
+        .card {
+            background: var(--card-bg); border: 1px solid rgba(0, 240, 255, 0.2);
+            border-radius: 16px; padding: 40px; margin-bottom: 80px;
+            transition: 0.6s all cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; transform: translateY(40px);
+        }
+        .card.visible { opacity: 1; transform: translateY(0); }
+        .card h2 { font-family: 'Orbitron'; color: var(--neon-blue); margin-bottom: 30px; font-size: 2.2rem; letter-spacing: 2px; }
+        .card img.main-img { width: 100%; height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 30px; border: 1px solid rgba(0, 240, 255, 0.3); }
+        .card p { font-size: 1.15rem; color: #cbd5e1; margin-bottom: 20px; text-align: justify; }
+
+        /* GRID TIPOS */
+        .delitos-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px; margin-top: 40px;
+        }
+        .delito-card {
+            background: rgba(255,255,255,0.02); padding: 25px;
+            border-radius: 12px; border: 1px solid rgba(0, 240, 255, 0.1);
+            text-align: left; transition: 0.4s;
+        }
+        .delito-card:hover { border-color: var(--neon-blue); background: rgba(0, 240, 255, 0.05); transform: translateY(-5px); }
+        .delito-card h3 { color: var(--neon-blue); margin-bottom: 12px; font-family: 'Orbitron'; font-size: 1rem; }
+
+        /* METODOLOGÍA */
+        .metodologia-card { border-color: rgba(0, 255, 65, 0.3) !important; }
+        .step-box { text-align: left; background: rgba(0, 255, 65, 0.03); padding: 20px; margin-bottom: 20px; border-radius: 10px; border-left: 4px solid var(--neon-green); }
+        .btn-evidencia { 
+            background: transparent; color: var(--neon-green); border: 1px solid var(--neon-green); 
+            padding: 8px 20px; margin-top: 15px; cursor: pointer; font-family: 'Fira Code'; 
+            font-size: 0.8rem; border-radius: 6px; transition: 0.3s; font-weight: 600;
+        }
+        .btn-evidencia:hover { background: var(--neon-green); color: #000; box-shadow: 0 0 20px rgba(0, 255, 65, 0.4); }
+
+        /* MODAL */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); }
+        .modal-content { position: relative; margin: 5vh auto; padding: 20px; width: 90%; max-width: 900px; background: #000; border: 1px solid var(--neon-blue); border-radius: 15px; }
+        .modal-content img { width: 100%; border-radius: 8px; box-shadow: 0 0 30px rgba(0, 240, 255, 0.2); }
+        .close { position: absolute; top: 15px; right: 25px; color: #fff; font-size: 40px; cursor: pointer; opacity: 0.7; transition: 0.3s; }
+        .close:hover { opacity: 1; color: var(--neon-blue); }
+
+        /* TERMINAL */
+        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: black; z-index: 9999; display: flex; justify-content: center; align-items: center; transition: 1s; }
+        .terminal { width: 90%; max-width: 650px; padding: 35px; border: 1px solid var(--neon-green); background: #000; box-shadow: 0 0 40px rgba(0, 255, 65, 0.1); border-radius: 8px; }
+        .typing-line { color: var(--neon-green); font-size: 1.1rem; margin-bottom: 10px; min-height: 1.4rem; font-family: 'Fira Code', monospace; text-align: left; }
+
+        footer { padding: 60px 20px; border-top: 1px solid rgba(0, 240, 255, 0.2); text-align: center; font-size: 0.9rem; color: #64748b; background: rgba(1, 4, 9, 0.5); }
+        footer b { color: var(--neon-blue); }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix-canvas"></canvas>
+
+    <div id="intro-overlay">
+        <div class="terminal">
+            <div id="terminal-lines"></div>
+            <button id="btn-entrar" onclick="unlockSite()" style="display:none; background:transparent; color:var(--neon-green); border:1px solid var(--neon-green); padding:12px; margin-top:25px; cursor:pointer; width:100%; font-family: 'Orbitron'; letter-spacing: 2px;">[ INICIAR SISTEMA ]</button>
+        </div>
+    </div>
+
+    <nav id="navbar">
+        <div class="nav-container">
+            <a href="#intro">Delitos Informáticos</a>
+            <a href="#que">¿Qué son?</a>
+            <a href="#tipos">Tipos</a>
+            <a href="#concluir">Conclusión</a>
+            <a href="#metodo">Metodología</a>
+        </div>
+    </nav>
+
+    <div class="content-container">
+        
+        <section id="intro" class="card">
+            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1000&q=80" class="main-img">
+            <h2>Delitos Informáticos</h2>
+            <p>Los delitos informáticos son todas aquellas acciones ilegales, delictivas o no autorizadas que utilizan dispositivos electrónicos y redes de internet para vulnerar la seguridad de los datos. En la actualidad, estos ataques representan un desafío crítico para la privacidad global.</p>
+        </section>
+
+        <section id="que" class="card">
+            <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1000&q=80" class="main-img">
+            <h2>¿Qué son?</h2>
+            <p>Se definen como actividades ilícitas que se realizan mediante el uso de computadoras, sistemas electrónicos o la red. Su objetivo primordial es dañar, sustraer o manipular información confidencial, afectando la integridad de los sistemas tecnológicos y la confianza de los usuarios en el entorno digital.</p>
+        </section>
+
+        <section id="tipos" class="card">
+            <h2>Tipos de delitos informáticos</h2>
+            <div class="delitos-container">
+                <div class="delito-card"><h3>Phishing</h3><p>Método de estafa para obtener credenciales bancarias mediante la suplantación de identidad oficial.</p></div>
+                <div class="delito-card"><h3>Malware</h3><p>Programas malintencionados (virus, troyanos) diseñados para infiltrarse y dañar equipos informáticos.</p></div>
+                <div class="delito-card"><h3>Ransomware</h3><p>Ataque que cifra los archivos del usuario, exigiendo un rescate económico para devolver el acceso.</p></div>
+                <div class="delito-card"><h3>Ciberacoso</h3><p>Uso de redes sociales y mensajería para hostigar, humillar o intimidar sistemáticamente a una persona.</p></div>
+            </div>
+        </section>
+
+        <section id="concluir" class="card">
+            <img src="https://images.unsplash.com/photo-1510511459019-5dda7724fd87?auto=format&fit=crop&w=1000&q=80" class="main-img">
+            <h2>Conclusión</h2>
+            <p>La ciberseguridad debe ser una prioridad individual y colectiva. Más allá de las herramientas técnicas, la barrera más efectiva contra las amenazas actuales es la educación digital y el desarrollo de un juicio crítico sobre nuestras acciones en la red.</p>
+        </section>
+
+        <section id="metodo" class="card metodologia-card">
+            <h2 style="color: var(--neon-green)">Metodología de Creación</h2>
+            <p style="text-align: center; margin-bottom: 30px;">Proceso técnico documentado para el desarrollo de este portal educativo:</p>
+            
+            <div class="step-box">
+                <b>01. Instrucciones a la IA:</b><br>
+                Modelado del diseño y generación de estructura técnica mediante prompts avanzados.
+                <br><button class="btn-evidencia" onclick="openModal('img_ia')">Visualizar Evidencia ></button>
+            </div>
+
+            <div class="step-box">
+                <b>02. Registro y Carga en GitHub:</b><br>
+                Implementación de control de versiones y alojamiento del código en la nube.
+                <br><button class="btn-evidencia" onclick="openModal('img_github')">Visualizar Evidencia ></button>
+            </div>
+
+            <div class="step-box">
+                <b>03. Ejecución Final:</b><br>
+                Pruebas de despliegue y validación del proyecto en navegadores web.
+                <br><button class="btn-evidencia" onclick="openModal('img_final')">Visualizar Evidencia ></button>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3 id="modal-title" style="color: var(--neon-blue); margin-bottom: 20px; font-family: 'Orbitron';">Evidencia de Desarrollo</h3>
+            <img id="modal-img" src="" alt="Captura de pantalla">
+        </div>
+    </div>
+
+    <footer>
+        <p>AUTORES: <b>ÁNGEL PÉREZ & ALEJANDRA PÉREZ</b></p>
+        <p>GRADO: <b>10° B</b> | DOCENTE: <b>JOYS CIFUENTES</b></p>
+        <p style="margin-top: 15px; font-size: 0.75rem; opacity: 0.6;">© 2026 - PROYECTO DE TECNOLOGÍA E INFORMÁTICA</p>
+    </footer>
+
+    <script>
+        // MATRIX EFFECT
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const drops = Array(Math.floor(canvas.width / 16)).fill(1);
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(1, 4, 9, 0.05)"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00f0ff"; ctx.font = "16px monospace";
+            drops.forEach((y, i) => {
+                ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+                if(y*16 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++;
+            });
+        }
+        setInterval(drawMatrix, 35);
+
+        // MODAL LOGIC
+        function openModal(type) {
+            const modal = document.getElementById("myModal");
+            const img = document.getElementById("modal-img");
+            modal.style.display = "block";
+            // Recuerda poner aquí tus links reales de GitHub
+            if(type === 'img_ia') img.src = "/INSTRUCCIONES-PARA-LA-AI.jpeg"; 
+            if(type === 'img_github') img.src = "GITHUB.jpeg";
+            if(type === 'img_final') img.src = "PAGINA-EN-LINEA.jpeg";
+        }
+        function closeModal() { document.getElementById("myModal").style.display = "none"; }
+
+        // TERMINAL TYPING
+        const lines = [
+            "> INICIANDO SISTEMA...",
+            "> PRESENTACIÓN DE: ÁNGEL PÉREZ & ALEJANDRA PÉREZ",
+            "> DOCENTE: JOYS CIFUENTES | GRADO: 10° B",
+            "> ESTADO DEL SISTEMA: ÓPTIMO."
+        ];
+        let l = 0;
+        function type() {
+            if(l < lines.length) {
+                let d = document.createElement('div'); d.className="typing-line";
+                document.getElementById('terminal-lines').appendChild(d);
+                let c = 0;
+                let int = setInterval(() => {
+                    d.textContent += lines[l][c]; c++;
+                    if(c === lines[l].length) { clearInterval(int); l++; setTimeout(type, 300); }
+                }, 30);
+            } else { document.getElementById('btn-entrar').style.display='block'; }
+        }
+        type();
+
+        function unlockSite() {
+            document.getElementById('intro-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('intro-overlay').style.display = 'none';
+                document.getElementById('navbar').style.display = 'flex';
+                document.body.style.overflowY = 'auto';
+                reveal();
+            }, 800);
+        }
+
+        function reveal() {
+            document.querySelectorAll('.card').forEach(c => {
+                if(c.getBoundingClientRect().top < window.innerHeight - 100) c.classList.add('visible');
+            });
+        }
+        window.addEventListener('scroll', reveal);
+    </script>
+</body>
+</html>
