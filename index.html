@@ -27,27 +27,42 @@
 
         #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.15; }
 
-        /* NAVEGACIÓN MEJORADA */
+        /* NAVEGACIÓN RESPONSIVE */
         nav {
             position: fixed; top: 0; width: 100%; background: rgba(1, 4, 9, 0.95);
-            border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding: 0 20px;
-            display: none; justify-content: center; align-items: center; height: 70px; z-index: 1000;
+            border-bottom: 1px solid rgba(0, 240, 255, 0.3); padding: 0 10px;
+            display: none; justify-content: center; align-items: center; min-height: 70px; z-index: 1000;
             backdrop-filter: blur(10px);
         }
-        .nav-container { display: flex; gap: 30px; }
-        nav a { 
-            color: #94a3b8; text-decoration: none; font-size: 0.85rem; 
-            text-transform: uppercase; font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px; transition: 0.3s; position: relative;
+        .nav-container { 
+            display: flex; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            justify-content: center; 
             padding: 10px 0;
         }
+        nav a { 
+            color: #94a3b8; text-decoration: none; font-size: 0.8rem; 
+            text-transform: uppercase; font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px; transition: 0.3s; position: relative;
+            padding: 5px 0;
+            white-space: nowrap;
+        }
+        
+        /* Ajustes específicos para móviles */
+        @media (max-width: 600px) {
+            nav { height: auto; padding: 10px; }
+            .nav-container { gap: 10px 15px; }
+            nav a { font-size: 0.65rem; }
+            .content-container { margin-top: 140px; } /* Más espacio arriba en móvil por el menú doble */
+        }
+
         nav a::after {
             content: ''; position: absolute; bottom: 0; left: 0; width: 0; 
             height: 2px; background: var(--neon-blue); transition: 0.3s;
         }
         nav a:hover { color: var(--neon-blue); }
         nav a:hover::after { width: 100%; }
-        nav a.active-link { color: var(--neon-green); }
 
         /* EFECTO FOCUS */
         .card:target {
@@ -66,6 +81,12 @@
         }
         .card.visible { opacity: 1; transform: translateY(0); }
         .card h2 { font-family: 'Orbitron'; color: var(--neon-blue); margin-bottom: 30px; font-size: 2.2rem; letter-spacing: 2px; }
+        
+        @media (max-width: 600px) {
+            .card h2 { font-size: 1.5rem; }
+            .card { padding: 20px; }
+        }
+
         .card img.main-img { width: 100%; height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 30px; border: 1px solid rgba(0, 240, 255, 0.3); }
         .card p { font-size: 1.15rem; color: #cbd5e1; margin-bottom: 20px; text-align: justify; }
 
@@ -139,7 +160,7 @@
 
         <section id="que" class="card">
             <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1000&q=80" class="main-img">
-            <h2>¿Qué son delitos informáticos?</h2>
+            <h2>¿Qué son los delitos informáticos?</h2>
             <p>Se definen como actividades ilícitas que se realizan mediante el uso de computadoras, sistemas electrónicos o la red. Su objetivo primordial es dañar, sustraer o manipular información confidencial, afectando la integridad de los sistemas tecnológicos y la confianza de los usuarios en el entorno digital.</p>
         </section>
 
@@ -199,7 +220,6 @@
     </footer>
 
     <script>
-        // MATRIX EFFECT
         const canvas = document.getElementById('matrix-canvas');
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -214,19 +234,16 @@
         }
         setInterval(drawMatrix, 35);
 
-        // MODAL LOGIC
         function openModal(type) {
             const modal = document.getElementById("myModal");
             const img = document.getElementById("modal-img");
             modal.style.display = "block";
-            // Recuerda poner aquí tus links reales de GitHub
-            if(type === 'img_ia') img.src = "/INSTRUCCIONES-PARA-LA-AI.jpeg"; 
+            if(type === 'img_ia') img.src = "INSTRUCCIONES-PARA-LA-AI.jpeg"; 
             if(type === 'img_github') img.src = "GITHUB.jpeg";
             if(type === 'img_final') img.src = "DESPLIEGUE-DE-LA-PAGINA.jpeg";
         }
         function closeModal() { document.getElementById("myModal").style.display = "none"; }
 
-        // TERMINAL TYPING
         const lines = [
             "> INICIANDO SISTEMA...",
             "> TEMA: DELITOS INFORMÁTICOS",
